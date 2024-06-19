@@ -1,5 +1,10 @@
 # Change Log
 
+## 0.7.2 (2024-06-19)
+- Improved robustness of function that formats ChatGPT request. Now the innermost content within
+triple single quotes (''') or triple double quotes (""") is correctly identified, including in
+edge cases with multiple level of quotes pairs.
+
 ## 0.7.1 (2024-05-05)
 
 - Added removal of function indents from ChatGPT request
