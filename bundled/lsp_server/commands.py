@@ -20,6 +20,26 @@ async def apply_generate_docstring(
     ls: pygls.server.LanguageServer,
     args: list[lsp.TextDocumentPositionParams, str, str],
 ) -> None:
+    """
+    Generate and apply docstring to the specified function in the source code using ChatGPT.
+
+    Args:
+        ls (pygls.server.LanguageServer): The Language Server instance.
+        args (list): A list containing the following elements:
+            - lsp.TextDocumentPositionParams: Text document position parameters.
+            - str: OpenAI API key for accessing the ChatGPT API.
+            - str: Progress token for tracking the generation progress.
+
+    Returns:
+        None
+
+    Raises:
+        Exception: If there is an error during the generation process.
+
+    Note:
+        This function uses ChatGPT to generate a docstring for the function at the specified cursor position.
+    The generated docstring is then applied to the source code.
+    """
     uri = args[0]["textDocument"]["uri"]
     openai_api_key = args[1]
     progress_token = args[2]
@@ -43,7 +63,8 @@ async def apply_generate_docstring(
 
     # clean function
     func_cleaner = FuncCleaner(parsed_func)
-    cleaned_func = func_cleaner.clean(indents=True, docstring=True, blank_lines=True)
+    cleaned_func = func_cleaner.clean(
+        indents=True, docstring=True, blank_lines=True)
 
     # format prompt
     prompt = prompt_pattern.format(
@@ -53,7 +74,8 @@ async def apply_generate_docstring(
 
     # get gocstring
     with ls.progress(progress_token) as progress:
-        task = asyncio.create_task(get_docstring(openai_api_key, openai_model, prompt))
+        task = asyncio.create_task(get_docstring(
+            openai_api_key, openai_model, prompt))
         while 1:
             if task.done():
                 break
