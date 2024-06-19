@@ -12,6 +12,16 @@ class NotFuncException(Exception):
 
 class FuncParser:
     def __init__(self, source: str, cursor: lsp.Position) -> None:
+        """
+        Initialize the JediInterpreter object.
+
+        Args:
+            source (str): The source code to be analyzed.
+            cursor (lsp.Position): The position of the cursor in the source code.
+
+        Raises:
+            NotFuncException: If the context type is not a function.
+        """
         self._source = source
         self._cursor = cursor
         self._script = jedi.Interpreter(self._source, namespaces=[])
@@ -32,7 +42,7 @@ class FuncParser:
     @property
     def code_lines(self) -> list:
         source_lines = self._source.splitlines(keepends=True)
-        return source_lines[self.range.start.line - 1 : self.range.end.line]
+        return source_lines[self.range.start.line - 1: self.range.end.line]
 
     @property
     def code(self) -> str:
@@ -54,10 +64,25 @@ class FuncParser:
 
     @property
     def indent_level(self) -> int:
+        """
+        Return the indentation level of the code snippet.
+
+        Returns:
+            int: The number of spaces used for indentation in the code snippet.
+        """
+        # Initialize indent level to 0
         indent_level = 0
+
+        # Regular expression to match leading whitespace
         pattern = r"^\s+"
-        match = re.match(pattern, self.code)
-        if match:
-            indent_count = len(match.group())
-            indent_level = indent_count // 4
+
+        # Match the leading whitespace in the first non-empty line of the code
+        for line in self.code.splitlines():
+            if line.strip():  # Skip empty lines
+                match = re.match(pattern, line)
+                if match:
+                    indent_count = len(match.group())
+                    indent_level = indent_count // 4
+                break  # Only check the first non-empty line
+
         return indent_level
